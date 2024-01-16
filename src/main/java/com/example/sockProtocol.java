@@ -8,6 +8,8 @@ public class sockProtocol {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private static int port = 1234;
+    private static String host = "10.0.0.7";
 
     public sockProtocol(Socket socket) {
         this.socket = socket;
@@ -43,5 +45,13 @@ public class sockProtocol {
         } catch (Exception e) {
             System.out.println("Error: " + e);
         }
+    }
+
+    public static String getHost() {
+        return host;
+    }
+
+    public static int getPort() {
+        return port;
     }
 }

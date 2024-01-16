@@ -8,7 +8,7 @@ public class server {
     public static void main(String[] args) {
         try {
             ServerSocket server = new ServerSocket();
-            server.bind(new java.net.InetSocketAddress("localhost", 1234));
+            server.bind(new java.net.InetSocketAddress(sockProtocol.getHost(), sockProtocol.getPort()));
             System.out.println("Server started on port 1234");
             ArrayList<GAME> games = new ArrayList<GAME>();
             while (true) {

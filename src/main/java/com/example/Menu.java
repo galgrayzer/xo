@@ -49,7 +49,7 @@ public class Menu {
                 error.setText("Error: Grid size must be at most 7");
             } else {
                 GUI gui = new GUI(1, gridSize);
-                Socket gameSocket = new Socket("localhost", 1234);
+                Socket gameSocket = new Socket(sockProtocol.getHost(), sockProtocol.getPort());
                 sockProtocol sock = new sockProtocol(gameSocket);
                 gui.setGame(gameSocket, sock);
                 sock.send(playerName.getText() + " " + gridSize);
