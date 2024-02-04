@@ -5,14 +5,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import javafx.application.Platform;
+import java.sql.ResultSet;
 
 import java.net.Socket;
 
 import java.io.IOException;
 
 public class Menu {
+    private mysql sql;
+
     @FXML
     private TextField gridSize;
     @FXML
@@ -22,17 +24,21 @@ public class Menu {
 
     @FXML
     public void Init() {
+        try {
+            this.sql = new mysql();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         new Thread(() -> {
             try {
                 int gridSize = Integer.parseInt(this.gridSize.getText());
                 Platform.runLater(() -> {
                     try {
                         processGridSize(gridSize);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 });
-
             } catch (NumberFormatException e) {
                 Platform.runLater(() -> error.setText("Error: Grid size must be an integer"));
             }
@@ -53,6 +59,16 @@ public class Menu {
                 sockProtocol sock = new sockProtocol(gameSocket);
                 gui.setGame(gameSocket, sock);
                 sock.send(playerName.getText() + " " + gridSize);
+                try {
+                    sql.query(
+                            "INSERT INTO players (username)"
+                                    + " SELECT '" + playerName.getText() + "'"
+                                    + " WHERE NOT EXISTS (SELECT 1 FROM players WHERE username='" + playerName.getText()
+                                    + "');",
+                            true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("GameWindow.fxml"));
                 loader.setController(gui);
                 App.getPrimaryStage().setScene(new Scene(loader.load(), 640, 480));
@@ -77,11 +93,35 @@ public class Menu {
                                 } else if (msgArr[0].equals("disableGrid")) {
                                     gui.disableGrid();
                                 } else if (msgArr[0].equals("win")) {
-                                    gui.win();
+                                    try {
+                                        sql.query(
+                                                "UPDATE playerStats SET wins = wins + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
+                                                        + playerName.getText() + "');",
+                                                true);
+                                        gui.win(sql, playerName.getText());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 } else if (msgArr[0].equals("lose")) {
-                                    gui.lose();
+                                    try {
+                                        sql.query(
+                                                "UPDATE playerStats SET losses = losses + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
+                                                        + playerName.getText() + "');",
+                                                true);
+                                        gui.lose(sql, playerName.getText());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 } else if (msgArr[0].equals("draw")) {
-                                    gui.draw();
+                                    try {
+                                        sql.query(
+                                                "UPDATE playerStats SET draws = draws + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
+                                                        + playerName.getText() + "');",
+                                                true);
+                                        gui.draw(sql, playerName.getText());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 } else if (msgArr[0].equals("refresh")) {
                                     gui.refresh();
                                 } else if (msgArr[0].equals("createGrid")) {
@@ -96,6 +136,11 @@ public class Menu {
                                 } else if (msgArr[0].equals("close")) {
                                     sock.close();
                                     isRunning = false;
+                                    try {
+                                        sql.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             });
                         }

@@ -1,5 +1,6 @@
 package com.example;
 
+import java.sql.ResultSet;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -26,6 +27,18 @@ public class GUI implements Initializable, gameInterface {
 
     @FXML
     private Label centerLabel;
+
+    @FXML
+    private Label playerScore;
+
+    @FXML
+    private Label wins;
+
+    @FXML
+    private Label draws;
+
+    @FXML
+    private Label losses;
 
     @FXML
     private GridPane gridPane;
@@ -138,19 +151,58 @@ public class GUI implements Initializable, gameInterface {
         }
     }
 
-    public void win() {
+    public void win(mysql sql, String username) {
         centerLabel.setText("You win!");
         gridPane.visibleProperty().set(false);
+        try {
+            ResultSet rs = sql.query(
+                    "select wins, draws, losses from playerStats ps where ps.playerId=(select playerID from players where username='"
+                            + username + "');",
+                    false);
+            rs.next();
+            playerScore.setText("Your Score:");
+            wins.setText("Wins: " + rs.getInt("wins"));
+            draws.setText("Draws: " + rs.getInt("draws"));
+            losses.setText("Losses: " + rs.getInt("losses"));
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
     }
 
-    public void draw() {
+    public void draw(mysql sql, String username) {
         centerLabel.setText("Draw!");
         gridPane.visibleProperty().set(false);
+        try {
+            ResultSet rs = sql.query(
+                    "select wins, draws, losses from playerStats ps where ps.playerId=(select playerID from players where username='"
+                            + username + "');",
+                    false);
+            rs.next();
+            playerScore.setText("Your Score:");
+            wins.setText("Wins: " + rs.getInt("wins"));
+            draws.setText("Draws: " + rs.getInt("draws"));
+            losses.setText("Losses: " + rs.getInt("losses"));
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
     }
 
-    public void lose() {
+    public void lose(mysql sql, String username) {
         centerLabel.setText("You lose!");
         gridPane.visibleProperty().set(false);
+        try {
+            ResultSet rs = sql.query(
+                    "select wins, draws, losses from playerStats ps where ps.playerId=(select playerID from players where username='"
+                            + username + "');",
+                    false);
+            rs.next();
+            playerScore.setText("Your Score:");
+            wins.setText("Wins: " + rs.getInt("wins"));
+            draws.setText("Draws: " + rs.getInt("draws"));
+            losses.setText("Losses: " + rs.getInt("losses"));
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
     }
 
     public void refreshGrid() {

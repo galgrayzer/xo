@@ -7,11 +7,11 @@ public interface gameInterface {
 
     public void enableGrid();
 
-    public void win();
+    public void win(mysql sql, String username);
 
-    public void lose();
+    public void lose(mysql sql, String username);
 
-    public void draw();
+    public void draw(mysql sql, String username);
 
     public void refresh();
 }

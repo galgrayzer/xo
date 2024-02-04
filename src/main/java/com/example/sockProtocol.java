@@ -9,7 +9,7 @@ public class sockProtocol {
     private DataInputStream in;
     private DataOutputStream out;
     private static int PORT = 1234;
-    private static String HOST = "192.168.43.121";
+    private static String HOST = "localhost";
 
     public sockProtocol(Socket socket) {
         this.socket = socket;
