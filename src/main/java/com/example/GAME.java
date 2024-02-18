@@ -10,8 +10,8 @@ public class GAME {
     private int playersJoined;
     private Socket player1Socket;
     private Socket player2Socket;
-    private sockProtocol sock1;
-    private sockProtocol sock2;
+    private sockProtocol sock1 = null;
+    private sockProtocol sock2 = null;
 
     public GAME(int gridSize, String player1, Socket player1Socket) {
         this.gridSize = gridSize;
@@ -212,17 +212,13 @@ public class GAME {
     }
 
     public void close() {
-        try {
+        if (sock1 != null && !sock1.isClosed()) {
             sock1.send("close");
-            player1Socket.close();
-            if (player2Socket != null) {
-
-                sock2.send("close");
-                player2Socket.close();
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e);
+            sock1.close();
+        }
+        if (sock2 != null && !sock2.isClosed()) {
+            sock2.send("close");
+            sock2.close();
         }
     }
-
 }

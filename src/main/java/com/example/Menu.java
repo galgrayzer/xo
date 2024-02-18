@@ -6,14 +6,20 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.application.Platform;
-import java.sql.ResultSet;
+
+import com.example.views.PlayersDB;
+import com.example.views.PlayerStatsDB;
+
+import com.example.models.*;
 
 import java.net.Socket;
-
+import java.util.ArrayList;
 import java.io.IOException;
 
 public class Menu {
-    private mysql sql;
+
+    private PlayersDB playersDB;
+    private PlayerStatsDB playerStatsDB;
 
     @FXML
     private TextField gridSize;
@@ -25,7 +31,8 @@ public class Menu {
     @FXML
     public void Init() {
         try {
-            this.sql = new mysql();
+            this.playerStatsDB = new PlayerStatsDB();
+            this.playersDB = new PlayersDB();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,8 +52,6 @@ public class Menu {
         }).start();
     }
 
-    private volatile boolean isRunning = true;
-
     private void processGridSize(int gridSize) throws IOException {
         try {
             if (gridSize < 3) {
@@ -60,12 +65,18 @@ public class Menu {
                 gui.setGame(gameSocket, sock);
                 sock.send(playerName.getText() + " " + gridSize);
                 try {
-                    sql.query(
-                            "INSERT INTO players (username)"
-                                    + " SELECT '" + playerName.getText() + "'"
-                                    + " WHERE NOT EXISTS (SELECT 1 FROM players WHERE username='" + playerName.getText()
-                                    + "');",
-                            true);
+                    Player player = new Player(playerName.getText());
+                    ArrayList<Player> players = playersDB.selectAll();
+                    boolean exists = false;
+                    for (Player p : players) {
+                        if (p.getUsername().equals(playerName.getText())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        playersDB.insert(player);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -74,12 +85,16 @@ public class Menu {
                 App.getPrimaryStage().setScene(new Scene(loader.load(), 640, 480));
                 App.getPrimaryStage().setOnCloseRequest(e -> {
                     sock.send("close");
-                    isRunning = false;
                 });
                 new Thread(() -> {
+                    String msg;
                     try {
-                        while (isRunning) {
-                            String msg = sock.res();
+                        while (true) {
+                            try {
+                                msg = sock.res();
+                            } catch (Exception e) {
+                                break;
+                            }
                             String[] msgArr = msg.split(" ");
                             Platform.runLater(() -> {
                                 // UI update code
@@ -94,31 +109,31 @@ public class Menu {
                                     gui.disableGrid();
                                 } else if (msgArr[0].equals("win")) {
                                     try {
-                                        sql.query(
-                                                "UPDATE playerStats SET wins = wins + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
-                                                        + playerName.getText() + "');",
-                                                true);
-                                        gui.win(sql, playerName.getText());
+                                        Player player = playersDB.selectByUsername(playerName.getText());
+                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
+                                        stats.setWins(stats.getWins() + 1);
+                                        playerStatsDB.update(stats);
+                                        gui.win(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 } else if (msgArr[0].equals("lose")) {
                                     try {
-                                        sql.query(
-                                                "UPDATE playerStats SET losses = losses + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
-                                                        + playerName.getText() + "');",
-                                                true);
-                                        gui.lose(sql, playerName.getText());
+                                        Player player = playersDB.selectByUsername(playerName.getText());
+                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
+                                        stats.setLosses(stats.getLosses() + 1);
+                                        playerStatsDB.update(stats);
+                                        gui.lose(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 } else if (msgArr[0].equals("draw")) {
                                     try {
-                                        sql.query(
-                                                "UPDATE playerStats SET draws = draws + 1 WHERE playerID = (SELECT playerID FROM players WHERE username='"
-                                                        + playerName.getText() + "');",
-                                                true);
-                                        gui.draw(sql, playerName.getText());
+                                        Player player = playersDB.selectByUsername(playerName.getText());
+                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
+                                        stats.setDraws(stats.getDraws() + 1);
+                                        playerStatsDB.update(stats);
+                                        gui.draw(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -135,9 +150,9 @@ public class Menu {
                                     gui.playersJoined();
                                 } else if (msgArr[0].equals("close")) {
                                     sock.close();
-                                    isRunning = false;
                                     try {
-                                        sql.close();
+                                        this.playerStatsDB.close();
+                                        this.playersDB.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -146,7 +161,6 @@ public class Menu {
                         }
                     } catch (Exception e) {
                         System.out.println("Error: " + e);
-                        isRunning = false;
                     }
                 }).start();
             }

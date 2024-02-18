@@ -21,13 +21,12 @@ public class sockProtocol {
         }
     }
 
-    public String res() {
+    public String res() throws Exception {
         try {
             return this.in.readUTF();
         } catch (Exception e) {
-            System.out.println("Error: " + e);
+            throw e;
         }
-        return "";
     }
 
     public void send(String res) {
@@ -45,6 +44,10 @@ public class sockProtocol {
         } catch (Exception e) {
             System.out.println("Error: " + e);
         }
+    }
+
+    public boolean isClosed() {
+        return this.socket.isClosed();
     }
 
     public static String getHost() {

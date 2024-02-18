@@ -16,7 +16,6 @@ public class server {
                 sockProtocol sock = new sockProtocol(client);
                 System.out.println("Client connected from " + client.getInetAddress());
                 new Thread(() -> {
-                    Boolean flag = true;
                     try {
                         String msg = sock.res();
                         String name = msg.split(" ")[0];
@@ -38,7 +37,7 @@ public class server {
                         }
                         games.add(currentgame);
                         System.out.println("Game created with size " + size);
-                        while (flag && !client.isClosed()) {
+                        while (!client.isClosed()) {
                             msg = sock.res();
                             String[] msgArr = msg.split(" ");
                             if (msgArr[0].equals("isFull")) {
@@ -57,14 +56,12 @@ public class server {
                             } else if (msgArr[0].equals("close")) {
                                 currentgame.close();
                                 games.remove(currentgame);
-                                sock.close();
-                                flag = false;
                                 System.out.println("Client disconnected from " + client.getInetAddress());
+                                break;
                             }
                         }
                     } catch (Exception e) {
                         System.out.println("Error: " + e);
-                        flag = false;
                         try {
                             sock.close();
                             System.out.println("Client disconnected from " + client.getInetAddress());

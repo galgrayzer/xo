@@ -1,5 +1,8 @@
 package com.example;
 
+import com.example.models.Stats;
+import com.example.models.Stats;
+
 public interface gameInterface {
     public void refreshGrid();
 
@@ -7,11 +10,11 @@ public interface gameInterface {
 
     public void enableGrid();
 
-    public void win(mysql sql, String username);
+    public void win(Stats stats, String username);
 
-    public void lose(mysql sql, String username);
+    public void lose(Stats stats, String username);
 
-    public void draw(mysql sql, String username);
+    public void draw(Stats stats, String username);
 
     public void refresh();
 }
