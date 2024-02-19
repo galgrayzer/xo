@@ -75,7 +75,7 @@ public class PlayersDB extends Mysql {
         try {
             this.statement = this.connection.prepareStatement("INSERT INTO players (username) VALUES (?)");
             this.statement.setString(1, player.getUsername());
-            this.changeTable();
+            this.inserts.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,7 +86,7 @@ public class PlayersDB extends Mysql {
             this.statement = this.connection.prepareStatement("UPDATE players SET username = ? WHERE playerId = ?");
             this.statement.setString(1, player.getUsername());
             this.statement.setInt(2, player.getId());
-            this.changeTable();
+            this.updates.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -96,7 +96,7 @@ public class PlayersDB extends Mysql {
         try {
             this.statement = this.connection.prepareStatement("DELETE FROM players WHERE playerId = ?");
             this.statement.setInt(1, id);
-            this.changeTable();
+            this.deletes.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }

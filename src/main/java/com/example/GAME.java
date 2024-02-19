@@ -1,6 +1,8 @@
 package com.example;
 
 import java.net.Socket;
+import com.example.views.*;
+import com.example.models.*;
 
 public class GAME {
     private int gridSize;
@@ -13,6 +15,9 @@ public class GAME {
     private sockProtocol sock1 = null;
     private sockProtocol sock2 = null;
 
+    private PlayersDB playersDB;
+    private PlayerStatsDB playerStatsDB;
+
     public GAME(int gridSize, String player1, Socket player1Socket) {
         this.gridSize = gridSize;
         this.player1 = player1;
@@ -20,6 +25,12 @@ public class GAME {
         this.playersJoined = 1;
         this.setSocket(player1Socket);
         this.grid = new int[gridSize][gridSize];
+        try {
+            this.playersDB = new PlayersDB();
+            this.playerStatsDB = new PlayerStatsDB();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setSocket(Socket socket) {
@@ -147,14 +158,26 @@ public class GAME {
 
     private void win(int value) {
         try {
+            Player player_1 = playersDB.selectByUsername(player1);
+            Player player_2 = playersDB.selectByUsername(player2);
+            Stats stats1 = playerStatsDB.selectByPlayerId(player_1.getId());
+            Stats stats2 = playerStatsDB.selectByPlayerId(player_2.getId());
             if (value == 1) {
+                stats1.setWins(stats1.getWins() + 1);
+                this.playerStatsDB.update(stats1);
+                stats2.setLosses(stats2.getLosses() + 1);
+                this.playerStatsDB.update(stats2);
+                this.playerStatsDB.saveChanges();
                 sock1.send("win");
                 sock2.send("lose");
-
             } else {
+                stats1.setLosses(stats1.getLosses() + 1);
+                this.playerStatsDB.update(stats1);
+                stats2.setWins(stats2.getWins() + 1);
+                this.playerStatsDB.update(stats2);
+                this.playerStatsDB.saveChanges();
                 sock1.send("lose");
                 sock2.send("win");
-
             }
         } catch (Exception e) {
             System.out.println("Error: " + e);
@@ -163,6 +186,15 @@ public class GAME {
 
     private void draw() {
         try {
+            Player player_1 = playersDB.selectByUsername(player1);
+            Player player_2 = playersDB.selectByUsername(player2);
+            Stats stats1 = playerStatsDB.selectByPlayerId(player_1.getId());
+            Stats stats2 = playerStatsDB.selectByPlayerId(player_2.getId());
+            stats1.setDraws(stats1.getDraws() + 1);
+            this.playerStatsDB.update(stats1);
+            stats2.setDraws(stats2.getDraws() + 1);
+            this.playerStatsDB.update(stats2);
+            this.playerStatsDB.saveChanges();
             sock1.send("draw");
             sock2.send("draw");
 

@@ -76,6 +76,7 @@ public class Menu {
                     }
                     if (!exists) {
                         playersDB.insert(player);
+                        playersDB.saveChanges();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -111,8 +112,6 @@ public class Menu {
                                     try {
                                         Player player = playersDB.selectByUsername(playerName.getText());
                                         Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        stats.setWins(stats.getWins() + 1);
-                                        playerStatsDB.update(stats);
                                         gui.win(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -121,8 +120,6 @@ public class Menu {
                                     try {
                                         Player player = playersDB.selectByUsername(playerName.getText());
                                         Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        stats.setLosses(stats.getLosses() + 1);
-                                        playerStatsDB.update(stats);
                                         gui.lose(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -131,8 +128,6 @@ public class Menu {
                                     try {
                                         Player player = playersDB.selectByUsername(playerName.getText());
                                         Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        stats.setDraws(stats.getDraws() + 1);
-                                        playerStatsDB.update(stats);
                                         gui.draw(stats, playerName.getText());
                                     } catch (Exception e) {
                                         e.printStackTrace();

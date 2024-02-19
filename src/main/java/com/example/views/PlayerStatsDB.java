@@ -63,7 +63,7 @@ public class PlayerStatsDB extends Mysql {
             this.statement.setInt(2, stats.getWins());
             this.statement.setInt(3, stats.getLosses());
             this.statement.setInt(4, stats.getDraws());
-            this.changeTable();
+            this.inserts.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -77,7 +77,7 @@ public class PlayerStatsDB extends Mysql {
             this.statement.setInt(2, stats.getLosses());
             this.statement.setInt(3, stats.getDraws());
             this.statement.setInt(4, stats.getId());
-            this.changeTable();
+            this.updates.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,7 +87,7 @@ public class PlayerStatsDB extends Mysql {
         try {
             this.statement = this.connection.prepareStatement("DELETE FROM playerStats WHERE playerId = ?");
             this.statement.setInt(1, stats.getId());
-            this.changeTable();
+            this.deletes.add(this.statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
